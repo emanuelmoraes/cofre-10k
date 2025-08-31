@@ -1,43 +1,47 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Cofre 10k
 
-## Get started
+Aplicativo para controle de depósitos e acompanhamento de meta financeira de R$10.000, inspirado no "cofre dos 10 mil" físico.
 
-1. Install dependencies
+## Funcionalidades
+- Tabuleiro interativo para marcar depósitos de valores variados (5, 10, 20, 100, 200).
+- Progresso visual: total guardado e valor restante para a meta.
+- Lista de depósitos realizados.
+- Persistência local dos dados (AsyncStorage).
+- Reset do cofre com confirmação.
+- Interface elegante e responsiva para investidores.
+- Ícones profissionais e navegação por abas.
 
-   ```bash
+## Tecnologias
+- Expo
+- React Native
+- Zustand (estado global)
+- AsyncStorage
+- @expo/vector-icons
+
+## Como rodar
+1. Instale as dependências:
+   ```sh
    npm install
    ```
-
-2. Start the app
-
-   ```bash
+2. Inicie o projeto:
+   ```sh
    npx expo start
    ```
+3. Teste no navegador ou no app Expo Go.
 
-In the output, you'll find options to open the app in a
+## Estrutura
+- `app/(tabs)/index.tsx`: Tela principal (Home)
+- `app/(tabs)/challenge.tsx`: Tabuleiro de depósitos
+- `app/store/useDeposits.ts`: Gerenciamento de depósitos
+- `components/`: Componentes visuais
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Personalização
+- Altere valores, cores e layout conforme sua necessidade.
+- O projeto é modular e fácil de adaptar.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
+## Licença
+MIT
 
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.

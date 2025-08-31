@@ -1,75 +1,147 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { useRouter } from 'expo-router';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDeposits } from '../store/useDeposits';
 
-export default function HomeScreen() {
+const GOAL = 10000;
+
+export default function Home() {
+  const deposits = useDeposits(s => s.deposits);
+  const total = deposits.reduce((sum, d) => sum + d.value, 0);
+  const router = useRouter();
+  const setDeposits = useDeposits.setState;
+
+  function handleReset() {
+    Alert.alert(
+      'Confirmar reset',
+      'Tem certeza que deseja apagar todos os depósitos? Esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Apagar tudo', style: 'destructive', onPress: () => setDeposits({ deposits: [] }) },
+      ]
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Cofre dos 10 mil</Text>
+      <View style={styles.card}>
+        <Text style={styles.label}>Total guardado</Text>
+        <Text style={styles.value}>R$ {total.toLocaleString('pt-BR')}</Text>
+        <Text style={styles.label}>Falta para a meta</Text>
+        <Text style={styles.value}>R$ {(GOAL-total).toLocaleString('pt-BR')}</Text>
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/challenge')}>
+          <Text style={styles.buttonText}>Ir para o tabuleiro</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, { backgroundColor: '#c62828', marginTop: 10 }]} onPress={handleReset}>
+          <Text style={[styles.buttonText, { color: '#fff' }]}>Resetar Cofre</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.subtitle}>Depósitos realizados</Text>
+      <View style={styles.depositsList}>
+        {deposits.length === 0 ? (
+          <Text style={styles.empty}>Nenhum depósito ainda.</Text>
+        ) : (
+          deposits.map((d, i) => (
+            <View key={i} style={styles.depositItem}>
+              <Text style={styles.depositValue}>R$ {d.value}</Text>
+            </View>
+          ))
+        )}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'flex-start',
+    padding: 24,
+    backgroundColor: '#f7f7fa',
   },
-  stepContainer: {
-    gap: 8,
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 24,
+    color: '#1a2236',
+    letterSpacing: 1,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 15,
+    color: '#6c7a93',
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  value: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#1a2236',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  button: {
+    marginTop: 18,
+    backgroundColor: '#1a2236',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginTop: 8,
+    marginBottom: 12,
+    color: '#1a2236',
+    alignSelf: 'flex-start',
+  },
+  depositsList: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    minHeight: 60,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  empty: {
+    fontSize: 15,
+    color: '#6c7a93',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  depositItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ececf0',
+    paddingVertical: 6,
+  },
+  depositValue: {
+    fontSize: 16,
+    color: '#1a2236',
+    fontWeight: '500',
   },
 });
