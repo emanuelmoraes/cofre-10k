@@ -22,7 +22,20 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen 
+          name="index" 
+          options={{ 
+            title: 'Cofre dos 10 mil',
+            headerShown: true 
+          }} 
+        />
+        <Stack.Screen 
+          name="challenge" 
+          options={{ 
+            title: 'Tabuleiro',
+            headerShown: true 
+          }} 
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

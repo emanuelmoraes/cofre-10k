@@ -6,19 +6,20 @@ import { create } from 'zustand';
 
 
 
-type Deposit = { id: string; value: number; dateISO: string; note?: string; };
+type Deposit = { id: string; value: number; dateISO: string; note?: string; cellIndex?: number; };
 type State = {
   deposits: Deposit[];
-  add: (value:number, note?:string)=>void;
+  add: (value:number, note?:string, cellIndex?:number)=>void;
   remove:(id:string)=>void;
+  reset: () => void;
   total:number;
   hydrate: () => void;
 };
 
 export const useDeposits = create<State>((set, get) => ({
   deposits: [],
-  add: (value, note) => {
-  const newDeposits = [...get().deposits, { id: uuid.v4() as string, value, dateISO: new Date().toISOString(), note }];
+  add: (value, note, cellIndex) => {
+  const newDeposits = [...get().deposits, { id: uuid.v4() as string, value, dateISO: new Date().toISOString(), note, cellIndex }];
     set({ deposits: newDeposits });
     AsyncStorage.setItem('deposits', JSON.stringify(newDeposits));
   },
@@ -26,6 +27,10 @@ export const useDeposits = create<State>((set, get) => ({
     const newDeposits = get().deposits.filter(d => d.id !== id);
     set({ deposits: newDeposits });
     AsyncStorage.setItem('deposits', JSON.stringify(newDeposits));
+  },
+  reset: () => {
+    set({ deposits: [] });
+    AsyncStorage.setItem('deposits', JSON.stringify([]));
   },
   get total() { return get().deposits.reduce((acc, d) => acc + d.value, 0); },
   hydrate: async () => {
