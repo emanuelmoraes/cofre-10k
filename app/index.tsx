@@ -1,9 +1,11 @@
 
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { Button, Card, IconButton } from 'react-native-paper';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { sharedStyles } from './shared/styles';
+import { useAppTheme } from '../contexts/ThemeContext';
+import { createStyles } from './shared/materialStyles';
 import { useDeposits } from './store/useDeposits';
 
 const GOAL = 10000;
@@ -14,14 +16,14 @@ export default function Home() {
   const router = useRouter();
   const { reset } = useDeposits();
   const [showResetModal, setShowResetModal] = useState(false);
+  const { isDark, toggleTheme, theme } = useAppTheme();
+  const styles = createStyles(theme);
 
   function handleReset() {
-    console.log('handleReset chamado'); // Debug
     setShowResetModal(true);
   }
 
   function confirmReset() {
-    console.log('Reset confirmado'); // Debug
     reset();
     setShowResetModal(false);
   }
@@ -30,33 +32,102 @@ export default function Home() {
     setShowResetModal(false);
   }
 
+  const progress = (total / GOAL) * 100;
+
   return (
-    <View style={sharedStyles.container}>
-      <Text style={sharedStyles.title}>Cofre dos 10 mil</Text>
-      <View style={sharedStyles.card}>
-        <Text style={sharedStyles.label}>Total guardado</Text>
-        <Text style={sharedStyles.value}>R$ {total.toLocaleString('pt-BR')}</Text>
-        <Text style={sharedStyles.label}>Falta para a meta</Text>
-        <Text style={sharedStyles.value}>R$ {(GOAL-total).toLocaleString('pt-BR')}</Text>
-        <TouchableOpacity style={sharedStyles.button} onPress={() => router.push('/challenge')}>
-          <Text style={sharedStyles.buttonText}>Ir para o tabuleiro</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[sharedStyles.button, { backgroundColor: '#c62828', marginTop: 10 }]} onPress={handleReset}>
-          <Text style={[sharedStyles.buttonText, { color: '#fff' }]}>Resetar Cofre</Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={sharedStyles.subtitle}>Depósitos realizados</Text>
-      <View style={sharedStyles.depositsList}>
-        {deposits.length === 0 ? (
-          <Text style={sharedStyles.empty}>Nenhum depósito ainda.</Text>
-        ) : (
-          deposits.map((d, i) => (
-            <View key={i} style={sharedStyles.depositItem}>
-              <Text style={sharedStyles.depositValue}>R$ {d.value}</Text>
+    <View style={styles.container}>
+      {/* Theme Toggle Button */}
+      <IconButton
+        icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
+        size={24}
+        onPress={() => {
+          console.log('Theme button pressed, current isDark:', isDark);
+          toggleTheme();
+        }}
+        style={{
+          alignSelf: 'flex-end',
+          backgroundColor: theme.colors.surfaceVariant,
+          marginBottom: 16,
+        }}
+        iconColor={theme.colors.onSurfaceVariant}
+      />
+
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ alignItems: 'center', paddingBottom: 100 }}
+      >
+        <Text style={styles.title}>Cofre dos 10 mil</Text>
+        
+        {/* Progress Card */}
+        <Card style={styles.progressCard}>
+          <Card.Content style={{ alignItems: 'center', width: '100%' }}>
+            <Text style={styles.label}>Progresso da Meta</Text>
+            <Text style={styles.value}>R$ {total.toLocaleString('pt-BR')}</Text>
+            
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${Math.min(progress, 100)}%` }
+                ]} 
+              />
             </View>
-          ))
-        )}
-      </View>
+            
+            <Text style={styles.label}>
+              {progress >= 100 ? 'Meta atingida! 🎉' : `${progress.toFixed(1)}% da meta`}
+            </Text>
+          </Card.Content>
+        </Card>
+
+        {/* Main Stats Card */}
+        <Card style={styles.card}>
+          <Card.Content style={{ alignItems: 'center' }}>
+            <Text style={styles.label}>Total Guardado</Text>
+            <Text style={styles.value}>R$ {total.toLocaleString('pt-BR')}</Text>
+            
+            <Text style={styles.label}>Falta para a Meta</Text>
+            <Text style={[styles.value, { color: theme.colors.secondary }]}>
+              R$ {Math.max(GOAL - total, 0).toLocaleString('pt-BR')}
+            </Text>
+
+            <Button
+              mode="contained"
+              onPress={() => router.push('/challenge')}
+              style={styles.button}
+              labelStyle={styles.buttonText}
+              contentStyle={{ paddingVertical: 4 }}
+            >
+              Ir para o Tabuleiro
+            </Button>
+
+            <Button
+              mode="contained"
+              onPress={handleReset}
+              style={styles.buttonSecondary}
+              labelStyle={styles.buttonTextSecondary}
+              contentStyle={{ paddingVertical: 4 }}
+            >
+              Resetar Cofre
+            </Button>
+          </Card.Content>
+        </Card>
+
+        {/* Deposits List */}
+        <Text style={styles.subtitle}>Depósitos Realizados</Text>
+        <Card style={styles.depositsList}>
+          <Card.Content>
+            {deposits.length === 0 ? (
+              <Text style={styles.empty}>Nenhum depósito ainda.</Text>
+            ) : (
+              deposits.map((d, i) => (
+                <View key={i} style={styles.depositItem}>
+                  <Text style={styles.depositValue}>R$ {d.value.toLocaleString('pt-BR')}</Text>
+                </View>
+              ))
+            )}
+          </Card.Content>
+        </Card>
+      </ScrollView>
 
       <ConfirmModal
         visible={showResetModal}

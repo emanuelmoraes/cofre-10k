@@ -1,8 +1,10 @@
 // app/challenge.tsx
 
 import { Feather } from '@expo/vector-icons';
-import { FlatList, Pressable, Text, View } from 'react-native';
-import { sharedStyles } from './shared/styles';
+import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { Card, IconButton } from 'react-native-paper';
+import { useAppTheme } from '../contexts/ThemeContext';
+import { createStyles } from './shared/materialStyles';
 import { useDeposits } from './store/useDeposits';
 
 // Array de valores "bagunçados" que soma exatamente 10.000
@@ -18,6 +20,8 @@ export default function Challenge() {
   const remove = useDeposits(s => s.remove);
   const total = deposits.reduce((sum, d) => sum + d.value, 0);
   const GOAL = 10000;
+  const { isDark, toggleTheme, theme } = useAppTheme();
+  const styles = createStyles(theme);
   
   // Criar dados das células com valores embaralhados
   const cellData = SHUFFLED_VALUES.map((value, index) => ({
@@ -49,53 +53,107 @@ export default function Challenge() {
   };
 
   const isCompleted = total === GOAL;
+  const progress = (total / GOAL) * 100;
 
   return (
-    <View style={sharedStyles.container}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>Desafio do Cofre</Text>
-        <Text style={sharedStyles.subtitle}>
-          Toque nos valores para depositar no seu cofre
-        </Text>
-      </View>
-
-      <FlatList
-        data={cellData}
-        numColumns={6}
-        keyExtractor={(item) => item.index.toString()}
-        contentContainerStyle={sharedStyles.challengeGrid}
-        renderItem={({ item }) => {
-          const pressed = isCellPressed(item.index);
-          return (
-            <Pressable
-              style={[
-                sharedStyles.challengeButton,
-                pressed && sharedStyles.challengeButtonPressed
-              ]}
-              onPress={() => {
-                if (pressed) {
-                  // Remove o depósito específico desta célula
-                  const depositId = cellToDepositMap[item.index];
-                  if (depositId) {
-                    remove(depositId);
-                  }
-                } else {
-                  // Adiciona um novo depósito associado a esta célula específica
-                  add(item.value, undefined, item.index);
-                }
-              }}
-            >
-              <Text style={[
-                sharedStyles.challengeButtonText,
-                pressed && sharedStyles.challengeButtonTextPressed
-              ]}>
-                {item.value}
-              </Text>
-              {pressed && <Feather name="check" size={16} color="#fff" />}
-            </Pressable>
-          );
+    <View style={styles.containerChallenge}>
+      {/* Theme Toggle Button */}
+      <IconButton
+        icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
+        size={24}
+        onPress={toggleTheme}
+        style={{
+          alignSelf: 'flex-end',
+          backgroundColor: theme.colors.surfaceVariant,
+          marginBottom: 16,
         }}
+        iconColor={theme.colors.onSurfaceVariant}
       />
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.titleChallenge}>Desafio do Cofre</Text>
+          <Text style={[styles.label, { textAlign: 'center', marginBottom: 16 }]}>
+            Toque nos valores para depositar no seu cofre
+          </Text>
+        </View>
+
+        {/* Progress Card */}
+        <Card style={styles.progressCard}>
+          <Card.Content style={{ alignItems: 'center' }}>
+            <Text style={styles.labelChallenge}>Progresso</Text>
+            <Text style={styles.valueChallenge}>
+              R$ {total.toLocaleString('pt-BR')} / R$ {GOAL.toLocaleString('pt-BR')}
+            </Text>
+            
+            <View style={styles.progressBar}>
+              <View 
+                style={[
+                  styles.progressFill, 
+                  { width: `${Math.min(progress, 100)}%` }
+                ]} 
+              />
+            </View>
+            
+            {isCompleted && (
+              <Text style={styles.successText}>
+                Parabéns! Meta alcançada! 🎉
+              </Text>
+            )}
+          </Card.Content>
+        </Card>
+
+        {/* Challenge Grid */}
+        <Card style={[styles.surface, { padding: 12 }]}>
+          <Card.Content>
+            <FlatList
+              data={cellData}
+              numColumns={6}
+              keyExtractor={(item) => item.index.toString()}
+              contentContainerStyle={styles.grid}
+              scrollEnabled={false}
+              renderItem={({ item }) => {
+                const pressed = isCellPressed(item.index);
+                return (
+                  <Pressable
+                    style={[
+                      styles.cell,
+                      pressed && styles.cellMarked
+                    ]}
+                    onPress={() => {
+                      if (pressed) {
+                        // Remove o depósito específico desta célula
+                        const depositId = cellToDepositMap[item.index];
+                        if (depositId) {
+                          remove(depositId);
+                        }
+                      } else {
+                        // Adiciona um novo depósito associado a esta célula específica
+                        add(item.value, undefined, item.index);
+                      }
+                    }}
+                  >
+                    <Text style={[
+                      styles.cellText,
+                      pressed && styles.cellTextMarked
+                    ]}>
+                      R$ {item.value}
+                    </Text>
+                    {pressed && (
+                      <Feather 
+                        name="check" 
+                        size={12} 
+                        color={theme.colors.primary} 
+                        style={styles.checkIcon}
+                      />
+                    )}
+                  </Pressable>
+                );
+              }}
+            />
+          </Card.Content>
+        </Card>
+      </ScrollView>
     </View>
   );
 }
