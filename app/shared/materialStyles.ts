@@ -170,18 +170,20 @@ export const createStyles = (theme: any) => StyleSheet.create({
   grid: {
     paddingBottom: 24,
     alignItems: 'stretch',
-    justifyContent: 'space-between'
+    justifyContent: 'space-evenly'
   },
   cell: {
-    margin: 4,
-    paddingVertical: 16,
+    marginHorizontal: 0.2,
+    marginVertical: 1,
+    paddingVertical: 1,
     borderWidth: 1,
     borderColor: theme.colors.outline,
     borderRadius: 12,
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
     justifyContent: 'center',
-    width: '16%',
+    flexBasis: '16.2%',
+    maxWidth: '16.2%',
     height: 64,
     elevation: 2,
     shadowColor: '#000',

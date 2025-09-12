@@ -3,6 +3,7 @@
 import { Feather } from '@expo/vector-icons';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { Card, IconButton } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../contexts/ThemeContext';
 import { createStyles } from './shared/materialStyles';
 import { useDeposits } from './store/useDeposits';
@@ -56,7 +57,7 @@ export default function Challenge() {
   const progress = (total / GOAL) * 100;
 
   return (
-    <View style={styles.containerChallenge}>
+    <SafeAreaView style={styles.containerChallenge}>
       {/* Theme Toggle Button */}
       <IconButton
         icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
@@ -137,7 +138,7 @@ export default function Challenge() {
                       styles.cellText,
                       pressed && styles.cellTextMarked
                     ]}>
-                      R$ {item.value}
+                      {item.value}
                     </Text>
                     {pressed && (
                       <Feather 
@@ -154,6 +155,6 @@ export default function Challenge() {
           </Card.Content>
         </Card>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

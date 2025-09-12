@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Button, Card, IconButton } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useAppTheme } from '../contexts/ThemeContext';
 import { createStyles } from './shared/materialStyles';
@@ -35,7 +36,7 @@ export default function Home() {
   const progress = (total / GOAL) * 100;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Theme Toggle Button */}
       <IconButton
         icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
@@ -138,6 +139,6 @@ export default function Home() {
         cancelText="Cancelar"
         confirmText="Apagar tudo"
       />
-    </View>
+    </SafeAreaView>
   );
 }
