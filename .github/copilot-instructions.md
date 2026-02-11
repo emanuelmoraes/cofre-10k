@@ -55,7 +55,7 @@ const handlePress = (value) => { ... }  // falta tipagem
 - **Constantes globais**: SCREAMING_SNAKE_CASE (`GOAL`, `SHUFFLED_VALUES`)
 - **Componentes**: PascalCase (`ConfirmModal`, `ThemedView`)
 - **Arquivos de componentes**: PascalCase.tsx (`ConfirmModal.tsx`)
-- **Arquivos utilitários**: camelCase.ts (`useDeposits.ts`, `materialStyles.ts`)
+- **Arquivos utilitários**: camelCase.ts (`useMarkedCells.ts`, `materialStyles.ts`)
 
 ### Tipos vs Interfaces
 Preferir `type` para a maioria dos casos. Usar `interface` apenas quando precisar de extensão/herança.
@@ -144,26 +144,34 @@ import { IconButton } from 'react-native-paper';
 ## Gerenciamento de Estado - Zustand
 
 ### Estrutura da Store
-Seguir o padrão estabelecido em `app/store/useDeposits.ts`:
+Seguir o padrão estabelecido em `app/store/useMarkedCells.ts`:
 
 ```typescript
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type State = {
-  data: DataType[];
-  add: (item: DataType) => void;
-  remove: (id: string) => void;
-  reset: () => void;
-  hydrate: () => void;
+type MarkedCell = {
+  index: number;
+  dateISO: string;
 };
 
-export const useStore = create<State>((set, get) => ({
-  data: [],
-  add: (item) => {
-    const newData = [...get().data, item];
-    set({ data: newData });
-    AsyncStorage.setItem('key', JSON.stringify(newData));
+type State = {
+  markedCells: MarkedCell[];
+  toggle: (index: number) => void;
+  reset: () => void;
+  hydrate: () => Promise<void>;
+};
+
+export const useMarkedCells = create<State>((set, get) => ({
+  markedCells: [],
+  toggle: (index) => {
+    const current = get().markedCells;
+    const exists = current.some((c) => c.index === index);
+    const newCells = exists
+      ? current.filter((c) => c.index !== index)
+      : [...current, { index, dateISO: new Date().toISOString() }];
+    set({ markedCells: newCells });
+    AsyncStorage.setItem('markedCells', JSON.stringify(newCells));
   },
   // ...
 }));
@@ -171,16 +179,16 @@ export const useStore = create<State>((set, get) => ({
 
 ### Regras
 - **SEMPRE persistir com AsyncStorage** para dados importantes
-- **SEMPRE criar hook de hidratação** para carregar dados ao iniciar
+- **SEMPRE criar hook de hidratacao** para carregar dados ao iniciar
 - **NUNCA acessar state diretamente** - usar seletores
 
 ```typescript
 // CORRETO
-const deposits = useDeposits(s => s.deposits);
-const add = useDeposits(s => s.add);
+const markedCells = useMarkedCells(s => s.markedCells);
+const toggle = useMarkedCells(s => s.toggle);
 
 // INCORRETO
-const { deposits, add } = useDeposits();  // re-renderiza em qualquer mudança
+const { markedCells, toggle } = useMarkedCells();  // re-renderiza em qualquer mudanca
 ```
 
 ---
@@ -258,7 +266,7 @@ __tests__/
 ├── screens/
 │   └── Home.test.tsx
 └── store/
-    └── useDeposits.test.ts
+    └── useMarkedCells.test.ts
 ```
 
 ### Padrão de Teste
@@ -347,11 +355,11 @@ refactor(theme): extrair cores para constantes
 - Evitar re-renders desnecessários com seletores Zustand específicos
 
 ```typescript
-// CORRETO - só re-renderiza quando deposits muda
-const deposits = useDeposits(s => s.deposits);
+// CORRETO - so re-renderiza quando markedCells muda
+const markedCells = useMarkedCells(s => s.markedCells);
 
-// INCORRETO - re-renderiza em qualquer mudança da store
-const store = useDeposits();
+// INCORRETO - re-renderiza em qualquer mudanca da store
+const store = useMarkedCells();
 ```
 
 ### Imagens

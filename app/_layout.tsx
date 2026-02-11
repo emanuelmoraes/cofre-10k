@@ -6,7 +6,7 @@ import { PaperProvider } from 'react-native-paper';
 import 'react-native-reanimated';
 
 import { ThemeProvider, useAppTheme } from '../contexts/ThemeContext';
-import { useDepositsHydration } from './store/useDeposits';
+import { useMarkedCellsHydration } from './store/useMarkedCells';
 
 function RootLayoutContent() {
   const { isDark, theme } = useAppTheme();
@@ -57,7 +57,7 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
-  useDepositsHydration();
+  useMarkedCellsHydration();
 
   return (
     <ThemeProvider>

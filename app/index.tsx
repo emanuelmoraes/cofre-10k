@@ -1,21 +1,19 @@
-
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Button, Card, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { GOAL, SHUFFLED_VALUES } from '../constants/challenge';
 import { useAppTheme } from '../contexts/ThemeContext';
 import { createStyles } from './shared/materialStyles';
-import { useDeposits } from './store/useDeposits';
-
-const GOAL = 10000;
+import { useMarkedCells, useTotal } from './store/useMarkedCells';
 
 export default function Home() {
-  const deposits = useDeposits(s => s.deposits);
-  const total = deposits.reduce((sum, d) => sum + d.value, 0);
+  const markedCells = useMarkedCells((s) => s.markedCells);
+  const reset = useMarkedCells((s) => s.reset);
+  const total = useTotal();
   const router = useRouter();
-  const { reset } = useDeposits();
   const [showResetModal, setShowResetModal] = useState(false);
   const { isDark, toggleTheme, theme } = useAppTheme();
   const styles = createStyles(theme);
@@ -41,10 +39,7 @@ export default function Home() {
       <IconButton
         icon={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
         size={24}
-        onPress={() => {
-          console.log('Theme button pressed, current isDark:', isDark);
-          toggleTheme();
-        }}
+        onPress={toggleTheme}
         style={{
           alignSelf: 'flex-end',
           backgroundColor: theme.colors.surfaceVariant,
@@ -75,7 +70,7 @@ export default function Home() {
             </View>
             
             <Text style={styles.label}>
-              {progress >= 100 ? 'Meta atingida! 🎉' : `${progress.toFixed(1)}% da meta`}
+              {progress >= 100 ? 'Meta atingida!' : `${progress.toFixed(1)}% da meta`}
             </Text>
           </Card.Content>
         </Card>
@@ -113,16 +108,17 @@ export default function Home() {
           </Card.Content>
         </Card>
 
-        {/* Deposits List */}
-        <Text style={styles.subtitle}>Depósitos Realizados</Text>
+        <Text style={styles.subtitle}>Depositos Realizados</Text>
         <Card style={styles.depositsList}>
           <Card.Content>
-            {deposits.length === 0 ? (
-              <Text style={styles.empty}>Nenhum depósito ainda.</Text>
+            {markedCells.length === 0 ? (
+              <Text style={styles.empty}>Nenhum deposito ainda.</Text>
             ) : (
-              deposits.map((d, i) => (
-                <View key={i} style={styles.depositItem}>
-                  <Text style={styles.depositValue}>R$ {d.value.toLocaleString('pt-BR')}</Text>
+              markedCells.map((cell) => (
+                <View key={cell.index} style={styles.depositItem}>
+                  <Text style={styles.depositValue}>
+                    R$ {SHUFFLED_VALUES[cell.index].toLocaleString('pt-BR')}
+                  </Text>
                 </View>
               ))
             )}

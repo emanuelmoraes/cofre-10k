@@ -93,7 +93,7 @@ cofre-10k/
 │   │   ├── styles.ts           # Estilos legados
 │   │   └── materialStyles.ts   # Estilos Material Design
 │   └── store/
-│       └── useDeposits.ts      # Store Zustand para depósitos
+│       └── useMarkedCells.ts   # Store Zustand para células marcadas
 ├── components/                   # Componentes reutilizáveis
 │   ├── ConfirmModal.tsx        # Modal de confirmação
 │   └── ...                     # Outros componentes
