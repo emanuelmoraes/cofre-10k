@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest"
+    "test": "jest",
+    "release:check": "npm run lint && npm run test && npx expo-doctor",
+    "release:android": "npm run release:check && eas build --platform android --profile production"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

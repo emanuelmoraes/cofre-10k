@@ -20,6 +20,18 @@ Este documento fornece um guia passo-a-passo completo para publicar o aplicativo
 - [ ] Ícones e splash screens criados
 - [ ] Versioning configurado
 
+### ✅ **Checklist rápido de release (recomendado)**
+```bash
+# 1) Validar projeto antes do build
+npm run release:check
+
+# 2) Gerar AAB de produção
+npm run release:android
+```
+
+Observação: esse fluxo mantém exatamente seu processo atual de publicação,
+adicionando apenas validações para reduzir retrabalho.
+
 ---
 
 ## 🔧 **Etapa 1: Configuração do EAS**
@@ -205,6 +217,11 @@ eas build --platform android --profile preview
 ```bash
 # Build para Google Play Store
 eas build --platform android --profile production
+```
+
+Alternativa com validação automática antes do build:
+```bash
+npm run release:android
 ```
 
 ### 5.3 Monitorar Build

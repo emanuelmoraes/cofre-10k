@@ -24,9 +24,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#fafafa"
       },
-      "permissions": [
-        "WRITE_EXTERNAL_STORAGE"
-      ],
       "blockedPermissions": [
         "RECORD_AUDIO"
       ]

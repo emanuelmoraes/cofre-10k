@@ -39,6 +39,6 @@
    - Eliminar estilos legados nao usados
    - Unificar estilos compartilhados em um unico arquivo
 
-3. Preparar para publicacao
+3. [CONCLUIDO] Preparar para publicacao
    - Verificar permisssoes Android necessarias
    - Revisar metadados e versionamento
