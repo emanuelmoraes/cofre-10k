@@ -47,6 +47,10 @@ export const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+  progressCardCompleted: {
+    borderWidth: 1,
+    borderColor: theme.colors.secondary,
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -237,6 +241,11 @@ export const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.secondary,
     marginTop: 16,
+    textAlign: 'center',
+  },
+  resetFeedback: {
+    color: theme.colors.onSurface,
+    fontSize: 14,
     textAlign: 'center',
   },
   // Theme toggle button

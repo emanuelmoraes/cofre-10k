@@ -18,6 +18,21 @@ type State = {
   hydrate: () => Promise<void>;
 };
 
+const isValidMarkedCell = (value: unknown): value is MarkedCell => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const maybeCell = value as Partial<MarkedCell>;
+  return (
+    typeof maybeCell.index === 'number' &&
+    Number.isInteger(maybeCell.index) &&
+    maybeCell.index >= 0 &&
+    maybeCell.index < SHUFFLED_VALUES.length &&
+    typeof maybeCell.dateISO === 'string'
+  );
+};
+
 export const useMarkedCells = create<State>((set, get) => ({
   markedCells: [],
 
@@ -44,27 +59,44 @@ export const useMarkedCells = create<State>((set, get) => ({
   },
 
   hydrate: async () => {
-    const saved = await AsyncStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed: MarkedCell[] = JSON.parse(saved);
-      // Filtra indices invalidos (fora do range)
-      const valid = parsed.filter(
-        (c) => c.index >= 0 && c.index < SHUFFLED_VALUES.length
-      );
+    try {
+      const saved = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!saved) {
+        set({ markedCells: [] });
+        return;
+      }
+
+      const parsed: unknown = JSON.parse(saved);
+      if (!Array.isArray(parsed)) {
+        set({ markedCells: [] });
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+        return;
+      }
+
+      const valid = parsed.filter(isValidMarkedCell);
       set({ markedCells: valid });
+
+      if (valid.length !== parsed.length) {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(valid));
+      }
+    } catch {
+      set({ markedCells: [] });
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([]));
     }
   },
 }));
 
 // Seletores derivados para uso nos componentes
 export const useTotal = () => {
-  const markedCells = useMarkedCells((s) => s.markedCells);
-  return calculateTotal(markedCells.map((c) => c.index));
+  return useMarkedCells((s) =>
+    calculateTotal(s.markedCells.map((cell) => cell.index))
+  );
 };
 
 export const useIsMarked = (index: number) => {
-  const markedCells = useMarkedCells((s) => s.markedCells);
-  return markedCells.some((c) => c.index === index);
+  return useMarkedCells((s) =>
+    s.markedCells.some((cell) => cell.index === index)
+  );
 };
 
 export const useMarkedIndexes = () => {

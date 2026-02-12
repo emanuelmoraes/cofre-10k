@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { UI_TEXT } from '../constants/strings';
 import { useAppTheme } from '../contexts/ThemeContext';
 
 interface ConfirmModalProps {
@@ -18,8 +19,8 @@ export function ConfirmModal({
   message, 
   onCancel, 
   onConfirm,
-  cancelText = 'Cancelar',
-  confirmText = 'Confirmar'
+  cancelText = UI_TEXT.common.cancel,
+  confirmText = UI_TEXT.common.confirm
 }: ConfirmModalProps) {
   const { theme } = useAppTheme();
   

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { PaperProvider } from 'react-native-paper';
 import 'react-native-reanimated';
 
+import { UI_TEXT } from '../constants/strings';
 import { ThemeProvider, useAppTheme } from '../contexts/ThemeContext';
 import { useMarkedCellsHydration } from './store/useMarkedCells';
 
@@ -37,14 +38,14 @@ function RootLayoutContent() {
           <Stack.Screen 
             name="index" 
             options={{ 
-              title: 'Cofre dos 10 mil',
+              title: UI_TEXT.app.title,
               headerShown: true 
             }} 
           />
           <Stack.Screen 
             name="challenge" 
             options={{ 
-              title: 'Tabuleiro',
+              title: UI_TEXT.app.boardTitle,
               headerShown: true 
             }} 
           />

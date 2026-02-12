@@ -90,7 +90,6 @@ cofre-10k/
 │   ├── challenge.tsx            # Tabuleiro de depósitos
 │   ├── +not-found.tsx          # Página 404
 │   ├── shared/
-│   │   ├── styles.ts           # Estilos legados
 │   │   └── materialStyles.ts   # Estilos Material Design
 │   └── store/
 │       └── useMarkedCells.ts   # Store Zustand para células marcadas

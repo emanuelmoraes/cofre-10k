@@ -7,6 +7,7 @@ describe('useMarkedCells', () => {
   beforeEach(async () => {
     useMarkedCells.setState({ markedCells: [] });
     await AsyncStorage.clear();
+    jest.restoreAllMocks();
   });
 
   it('adiciona e remove uma celula ao alternar', () => {
@@ -41,5 +42,45 @@ describe('useMarkedCells', () => {
     const state = useMarkedCells.getState().markedCells;
     expect(state).toHaveLength(1);
     expect(state[0].index).toBe(0);
+  });
+
+  it('faz fallback seguro quando JSON esta corrompido', async () => {
+    jest.spyOn(AsyncStorage, 'getItem').mockResolvedValueOnce('{invalid-json');
+    const setItemSpy = jest.spyOn(AsyncStorage, 'setItem');
+
+    await act(async () => {
+      await useMarkedCells.getState().hydrate();
+    });
+
+    expect(useMarkedCells.getState().markedCells).toHaveLength(0);
+    expect(setItemSpy).toHaveBeenCalledWith('markedCells', JSON.stringify([]));
+  });
+
+  it('faz fallback seguro quando payload nao e array', async () => {
+    jest.spyOn(AsyncStorage, 'getItem').mockResolvedValueOnce(
+      JSON.stringify({ index: 1, dateISO: '2026-02-01T10:00:00.000Z' })
+    );
+    const setItemSpy = jest.spyOn(AsyncStorage, 'setItem');
+
+    await act(async () => {
+      await useMarkedCells.getState().hydrate();
+    });
+
+    expect(useMarkedCells.getState().markedCells).toHaveLength(0);
+    expect(setItemSpy).toHaveBeenCalledWith('markedCells', JSON.stringify([]));
+  });
+
+  it('faz fallback seguro quando leitura do AsyncStorage falha', async () => {
+    jest.spyOn(AsyncStorage, 'getItem').mockRejectedValueOnce(
+      new Error('storage read error')
+    );
+    const setItemSpy = jest.spyOn(AsyncStorage, 'setItem');
+
+    await act(async () => {
+      await useMarkedCells.getState().hydrate();
+    });
+
+    expect(useMarkedCells.getState().markedCells).toHaveLength(0);
+    expect(setItemSpy).toHaveBeenCalledWith('markedCells', JSON.stringify([]));
   });
 });

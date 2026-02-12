@@ -1,26 +1,103 @@
 // app/challenge.tsx
 
 import { Feather } from '@expo/vector-icons';
+import { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { Card, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GOAL, SHUFFLED_VALUES } from '../constants/challenge';
+import { UI_TEXT } from '../constants/strings';
 import { useAppTheme } from '../contexts/ThemeContext';
 import { createStyles } from './shared/materialStyles';
-import { useMarkedCells, useMarkedIndexes, useTotal } from './store/useMarkedCells';
+import { useIsMarked, useMarkedCells, useTotal } from './store/useMarkedCells';
+
+type CellItemData = {
+  value: number;
+  index: number;
+};
+
+type ChallengeCellProps = {
+  item: CellItemData;
+  onToggle: (index: number) => void;
+  checkColor: string;
+  styles: ReturnType<typeof createStyles>;
+};
+
+const CELL_DATA: CellItemData[] = SHUFFLED_VALUES.map((value, index) => ({
+  value,
+  index,
+}));
+
+const ChallengeCell = memo(
+  ({ item, onToggle, checkColor, styles }: ChallengeCellProps) => {
+    const pressed = useIsMarked(item.index);
+
+    return (
+      <Pressable
+        testID={`cell-${item.index}`}
+        style={[styles.cell, pressed && styles.cellMarked]}
+        onPress={() => onToggle(item.index)}
+      >
+        <Text style={[styles.cellText, pressed && styles.cellTextMarked]}>
+          {item.value}
+        </Text>
+        {pressed && (
+          <Feather
+            name="check"
+            size={12}
+            color={checkColor}
+            style={styles.checkIcon}
+          />
+        )}
+      </Pressable>
+    );
+  }
+);
+
+ChallengeCell.displayName = 'ChallengeCell';
 
 export default function Challenge() {
   const toggle = useMarkedCells((s) => s.toggle);
-  const markedIndexes = useMarkedIndexes();
   const total = useTotal();
   
   const { isDark, toggleTheme, theme } = useAppTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const cellData = SHUFFLED_VALUES.map((value, index) => ({
-    value,
-    index,
-  }));
+  const handleToggleCell = useCallback(
+    (index: number) => {
+      toggle(index);
+    },
+    [toggle]
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: CellItemData }) => {
+      return (
+        <ChallengeCell
+          item={item}
+          onToggle={handleToggleCell}
+          checkColor={theme.colors.primary}
+          styles={styles}
+        />
+      );
+    },
+    [handleToggleCell, styles, theme.colors.primary]
+  );
+
+  const keyExtractor = useCallback((item: CellItemData) => item.index.toString(), []);
+
+  const getItemLayout = useCallback(
+    (_: ArrayLike<CellItemData> | null | undefined, index: number) => {
+      const row = Math.floor(index / 6);
+      const rowHeight = 66;
+      return {
+        length: rowHeight,
+        offset: rowHeight * row,
+        index,
+      };
+    },
+    []
+  );
 
   const isCompleted = total >= GOAL;
   const progress = (total / GOAL) * 100;
@@ -41,15 +118,15 @@ export default function Challenge() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.titleChallenge}>Desafio do Cofre</Text>
+          <Text style={styles.titleChallenge}>{UI_TEXT.challenge.title}</Text>
           <Text style={[styles.label, { textAlign: 'center', marginBottom: 16 }]}>
-            Toque nos valores para depositar no seu cofre
+            {UI_TEXT.challenge.subtitle}
           </Text>
         </View>
 
-        <Card style={styles.progressCard}>
+        <Card style={[styles.progressCard, isCompleted && styles.progressCardCompleted]}>
           <Card.Content style={{ alignItems: 'center' }}>
-            <Text style={styles.labelChallenge}>Progresso</Text>
+            <Text style={styles.labelChallenge}>{UI_TEXT.challenge.progressTitle}</Text>
             <Text style={styles.valueChallenge}>
               R$ {total.toLocaleString('pt-BR')} / R$ {GOAL.toLocaleString('pt-BR')}
             </Text>
@@ -64,7 +141,7 @@ export default function Challenge() {
             </View>
 
             {isCompleted && (
-              <Text style={styles.successText}>Parabens! Meta alcancada!</Text>
+              <Text style={styles.successText}>{UI_TEXT.challenge.goalCompleted}</Text>
             )}
           </Card.Content>
         </Card>
@@ -72,34 +149,18 @@ export default function Challenge() {
         <Card style={[styles.surface, { padding: 12 }]}>
           <Card.Content>
             <FlatList
-              data={cellData}
+              data={CELL_DATA}
               numColumns={6}
-              keyExtractor={(item) => item.index.toString()}
+              keyExtractor={keyExtractor}
               contentContainerStyle={styles.grid}
               scrollEnabled={false}
-              renderItem={({ item }) => {
-                const pressed = markedIndexes.has(item.index);
-                return (
-                  <Pressable
-                    style={[styles.cell, pressed && styles.cellMarked]}
-                    onPress={() => toggle(item.index)}
-                  >
-                    <Text
-                      style={[styles.cellText, pressed && styles.cellTextMarked]}
-                    >
-                      {item.value}
-                    </Text>
-                    {pressed && (
-                      <Feather
-                        name="check"
-                        size={12}
-                        color={theme.colors.primary}
-                        style={styles.checkIcon}
-                      />
-                    )}
-                  </Pressable>
-                );
-              }}
+              initialNumToRender={120}
+              maxToRenderPerBatch={120}
+              windowSize={10}
+              updateCellsBatchingPeriod={50}
+              removeClippedSubviews={false}
+              getItemLayout={getItemLayout}
+              renderItem={renderItem}
             />
           </Card.Content>
         </Card>
