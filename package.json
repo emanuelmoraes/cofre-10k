@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "release:check": "npm run lint && npm run test && npx expo-doctor",
+    "release:check": "npm run lint && npm run test && npx --yes expo-doctor@latest",
     "release:android": "npm run release:check && eas build --platform android --profile production"
   },
   "dependencies": {
